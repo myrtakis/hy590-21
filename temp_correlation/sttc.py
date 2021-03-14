@@ -70,6 +70,6 @@ def compute_null_sttc(neuronA, neuronB, dt):
     
     CtrlGrpMean = np.mean(boostratps_NullSTTC_distribution)
     CtrlGrpStDev = np.std(boostratps_NullSTTC_distribution)
-    
+    print(f'Mean {CtrlGrpMean} and Std {CtrlGrpMean} of Null STTC Distribution')
     return CtrlGrpMean, CtrlGrpStDev, boostratps_NullSTTC_distribution
 
