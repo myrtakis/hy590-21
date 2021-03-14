@@ -58,10 +58,11 @@ def compute_null_sttc(neuronA, neuronB, dt):
     CtrlGrpStDev = None
     num_of_shifts = 500
     boostratps_NullSTTC_distribution = []
+    np.random.seed(4342)
     for boostratps in range(num_of_shifts):
         
         random_shift_A, random_shift_B = np.random.randint(neuronA.shape[0],None,2)
-        
+        ### or keep A fixed and shift B
         neuronA_randomly_shfited = pd.Series(np.roll(neuronA, random_shift_A))
         neuronB_randomly_shfited = pd.Series(np.roll(neuronB, random_shift_B))
         
