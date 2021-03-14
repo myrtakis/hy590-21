@@ -1,0 +1,12 @@
+All the data will be included in this folder
+
+The frames of the first 8min period are 1:3300
+
+The file s3_idx24_df_f.csv contains the df/f:
+the first dimension is frames, while the second is neurons (frames x neurons)
+
+The file s3_idx24_deconvolved.csv contains the deconvolved signal:
+the first dimension is frames, while the second is neurons (frames x neurons)
+
+The file s3_idx24_fluorescense.csv contains the fluorescense (raw - background):
+the first dimension is frames, while the second is neurons (frames x neurons)
