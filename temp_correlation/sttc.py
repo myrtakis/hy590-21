@@ -17,7 +17,7 @@ def sttc(measurements_df, dt):
         CtrlGrpMean, CtrlGrpStDev, NullSTTC = compute_null_sttc(neuronA, neuronB, dt)
         sttc_matrix.append([neuronA.name, neuronB.name, observed_val, CtrlGrpMean, CtrlGrpStDev, NullSTTC])
     return pd.DataFrame(sttc_matrix, columns=col_names)
-
+    
 
 def compute_corr(neuronA, neuronB, dt):
     # This function returns the sttc score
@@ -65,11 +65,18 @@ def compute_null_sttc(neuronA, neuronB, dt):
         neuronA_randomly_shfited = pd.Series(np.roll(neuronA, random_shift_A))
         neuronB_randomly_shfited = pd.Series(np.roll(neuronB, random_shift_B))
         
-        boostratps_NullSTTC_distribution.append(compute_corr(neuronA_randomly_shfited, neuronB_randomly_shfited))
+        boostratps_NullSTTC_distribution.append(compute_corr(neuronA_randomly_shfited, neuronB_randomly_shfited,dt))
     
     
     CtrlGrpMean = np.mean(boostratps_NullSTTC_distribution)
     CtrlGrpStDev = np.std(boostratps_NullSTTC_distribution)
-    print(f'Mean {CtrlGrpMean} and Std {CtrlGrpMean} of Null STTC Distribution')
+    print(f'Mean {CtrlGrpMean} and Std {CtrlGrpStDev} of Null STTC Distribution')
     return CtrlGrpMean, CtrlGrpStDev, boostratps_NullSTTC_distribution
+
+
+
+
+
+
+
 
