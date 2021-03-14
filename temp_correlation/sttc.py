@@ -11,17 +11,44 @@ def sttc(measurements_df, dt):
     sttc_matrix = []
     col_names = ['NeuronA', 'NeuronB', 'STTC', 'CtrlGrpMean', 'CtrlGrpStDev', 'NullSTTC']
     for c in neuron_pairs:
-        neuron1 = measurements_df.loc[:, c[0]]
-        neuron2 = measurements_df.loc[:, c[1]]
-        observed_val = compute_corr(neuron1, neuron2, dt)
-        CtrlGrpMean, CtrlGrpStDev, NullSTTC = compute_null_sttc(neuron1, neuron2, dt)
-        sttc_matrix.append([neuron1.name, neuron2.name, observed_val, CtrlGrpMean, CtrlGrpStDev, NullSTTC])
+        neuronA = measurements_df.loc[:, c[0]]
+        neuronB = measurements_df.loc[:, c[1]]
+        observed_val = compute_corr(neuronA, neuronB, dt)
+        CtrlGrpMean, CtrlGrpStDev, NullSTTC = compute_null_sttc(neuronA, neuronB, dt)
+        sttc_matrix.append([neuronA.name, neuronB.name, observed_val, CtrlGrpMean, CtrlGrpStDev, NullSTTC])
     return pd.DataFrame(sttc_matrix, columns=col_names)
 
 
-def compute_corr(neuron1, neuron2, dt):
+def compute_corr(neuronA, neuronB, dt = 2):
     # This function returns the sttc score
-    return 0
+    assert neuronA.shape[0] == neuronB.shape[0]
+    
+    ### Try for dt =8 20 big sensiticity 
+    #neuronA = measurements_df.iloc[:, 0]
+    #neuronB = measurements_df.iloc[:, 1]
+
+    neuronA_shifted_plus = neuronA.copy(deep = True)
+    neuronB_shifted_minus = neuronB.copy(deep = True)
+    ### Find the assembled porpotion of timestamp within +- lag fraction over all spike events per neuron A B respectively 
+    for lag in range(dt):
+        neuronA_shifted_plus += neuronA_shifted_plus.shift(1)
+        neuronB_shifted_minus += neuronB_shifted_minus.shift(-1)
+        
+    neuronA_shifted_plus[(neuronA_shifted_plus != 0) & (~(neuronA_shifted_plus.isna()))] = 1
+    neuronB_shifted_minus[(neuronB_shifted_minus != 0) & (~(neuronB_shifted_minus.isna()))] = 1
+    
+    T_A_plus = neuronA_shifted_plus.sum()/neuronA.shape[0]
+    T_B_minus = neuronB_shifted_minus.sum()/neuronB.shape[0]
+    
+    ### Number of splkes found within the lagged interval per direction
+    P_A_Bminus = ((neuronA == 1) & (neuronB_shifted_minus == 1)).sum()/neuronA.sum()
+    P_B_Aplus = ((neuronB == 1) & (neuronA_shifted_plus == 1)).sum()/neuronB.sum()
+    
+    section1 = (P_A_Bminus - T_B_minus) / (1 - P_A_Bminus*T_B_minus)
+    section2 = (P_B_Aplus - T_A_plus) / (1 - P_B_Aplus*T_A_plus)
+    STTC_A_B = 0.5 * (section1 + section2)
+    print("STTC A_B",str(STTC_A_B))
+    return STTC_A_B
 
 
 def compute_null_sttc(neuron1, neuron2, dt):
