@@ -31,8 +31,8 @@ def compute_corr(neuronA, neuronB, dt = 2):
     neuronB_shifted_minus = neuronB.copy(deep = True)
     ### Find the assembled porpotion of timestamp within +- lag fraction over all spike events per neuron A B respectively 
     for lag in range(dt):
-        neuronA_shifted_plus += neuronA_shifted_plus.shift(1)
-        neuronB_shifted_minus += neuronB_shifted_minus.shift(-1)
+        neuronA_shifted_plus += neuronA_shifted_plus.shift(1, fill_value = 0)
+        neuronB_shifted_minus += neuronB_shifted_minus.shift(-1, fill_value = 0)
         
     neuronA_shifted_plus[(neuronA_shifted_plus != 0) & (~(neuronA_shifted_plus.isna()))] = 1
     neuronB_shifted_minus[(neuronB_shifted_minus != 0) & (~(neuronB_shifted_minus.isna()))] = 1
@@ -56,6 +56,8 @@ def compute_null_sttc(neuron1, neuron2, dt):
     CtrlGrpStDev = None
     NullSTTC = None
     num_of_shifts = 500
+    
+    np.roll
     # This function performs 500 random circular shifts and calls compute corr for each one of them
     # it returns CtrlGrpMean, CtrlGrpStDev and a random NullSTTC value from the 500
     return CtrlGrpMean, CtrlGrpStDev, NullSTTC
