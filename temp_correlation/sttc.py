@@ -19,7 +19,7 @@ def sttc(measurements_df, dt):
     return pd.DataFrame(sttc_matrix, columns=col_names)
 
 
-def compute_corr(neuronA, neuronB, dt = 2):
+def compute_corr(neuronA, neuronB, dt):
     # This function returns the sttc score
     assert neuronA.shape[0] == neuronB.shape[0]
     
@@ -51,14 +51,25 @@ def compute_corr(neuronA, neuronB, dt = 2):
     return STTC_A_B
 
 
-def compute_null_sttc(neuron1, neuron2, dt):
-    CtrlGrpMean = None
-    CtrlGrpStDev = None
-    NullSTTC = None
-    num_of_shifts = 500
-    
-    np.roll
+def compute_null_sttc(neuronA, neuronB, dt):        
     # This function performs 500 random circular shifts and calls compute corr for each one of them
     # it returns CtrlGrpMean, CtrlGrpStDev and a random NullSTTC value from the 500
-    return CtrlGrpMean, CtrlGrpStDev, NullSTTC
+    CtrlGrpMean = None
+    CtrlGrpStDev = None
+    num_of_shifts = 500
+    boostratps_NullSTTC_distribution = []
+    for boostratps in range(num_of_shifts):
+        
+        random_shift_A, random_shift_B = np.random.randint(neuronA.shape[0],None,2)
+        
+        neuronA_randomly_shfited = pd.Series(np.roll(neuronA, random_shift_A))
+        neuronB_randomly_shfited = pd.Series(np.roll(neuronB, random_shift_B))
+        
+        boostratps_NullSTTC_distribution.append(compute_corr(neuronA_randomly_shfited, neuronB_randomly_shfited))
+    
+    
+    CtrlGrpMean = np.mean(boostratps_NullSTTC_distribution)
+    CtrlGrpStDev = np.std(boostratps_NullSTTC_distribution)
+    
+    return CtrlGrpMean, CtrlGrpStDev, boostratps_NullSTTC_distribution
 
