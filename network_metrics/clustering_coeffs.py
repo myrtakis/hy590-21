@@ -17,13 +17,13 @@ def comp_clustering_coef(A,i):
     k_i = A[i,:].sum() 
     local_clustering_coef = sum([ A[i,j]* sum([A[j,k]*A[k,i] for k in range(A.shape[0])]) for j in range(A.shape[0])])
     #or
-    #local_clusterign_coef = sum([ A[i,j] * (A[j,:]*A[:,i]).sum() for j in range(90)])
+    #local_clusterign_coef = sum([ A[i,j] * (A[j,:]*A[:,i]).sum() for j in range(A.shape[0])])
     local_clustering_coef *= 1/(k_i*(k_i -1))
     return local_clustering_coef
 
 ## Compute Local Clustering Coefficients
 def local_clustering_coeffs(Adj_matrix):
-    Adj_matrix = np.ones((90,90))
+    #Adj_matrix = np.ones((90,90))
     #clustering_coefs = []
     for i in range(Adj_matrix.shape[0]):
         yield comp_clustering_coef(Adj_matrix,i)
