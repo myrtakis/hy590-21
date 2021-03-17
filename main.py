@@ -7,6 +7,7 @@ import numpy as np
 
 
 DATA_DIR = 'data'
+calculate_sttc = True
 
 CELL_MEMBERSHIP_FNAME   = 'cellMembershipMouse24705.csv'
 COORDS_FNAME            = 'coords.csv'
@@ -27,8 +28,6 @@ if __name__ == '__main__':
     cell_memb_df = pd.read_csv(os.path.join(args.datadir, CELL_MEMBERSHIP_FNAME))
     coords_df = pd.read_csv(os.path.join(args.datadir, COORDS_FNAME))
     boundaries_df = pd.read_csv(os.path.join(args.datadir, BOUNDARIES_FNAME))
-    # TODO for fast development pace I created a file only with 2 neurons because the full dataframe is large to load every time.
-    #  When sttc metric is ready we will uncomment the the following lines and the filters
     # measurements_df = pd.read_csv(os.path.join(args.datadir, MEASUREMENTS_FNAME))
     measurements_df = pd.read_csv(os.path.join(args.datadir, 'pair_1_1105.csv'))
 
@@ -36,11 +35,12 @@ if __name__ == '__main__':
     measurements_df = measurements_df.loc[:3300, :]     # 3300 is the final frame for the 8 minute recording period as required by the task
 
     # neuron_ids = boundaries_df['x']
-    # neuron_ids = data_filters.keep_neurons_of_area(cell_memb_df.loc[neuron_ids], 'V1')
-    # neuron_ids = data_filters.keep_neurons_of_firing_rate(measurements_df.loc[:, neuron_ids]) # This is not activated for now
-    # neuron_ids = data_filters.keep_neurons_of_coords(coords_df.loc[neuron_ids]) # This is not activated for now
-
-    # Keep the useful neurons
+    # neuron_ids = data_filters.keep_neurons_of_area(cell_memb_df[cell_memb_df['neuronID'].apply(lambda x: x in neuron_ids)], 'V1')
+    # neuron_ids = data_filters.keep_neurons_of_coords(coords_df[coords_df['neuron_id'].apply(lambda x: x in neuron_ids)],
+    #                                                  'z', lambda x: 100 < x < 300) # Keep neurons of L23 layer
+    # neuron_ids = data_filters.keep_neurons_of_firing_rate(measurements_df.loc[:, neuron_ids], 0.01)
+    # # Keep the useful neurons
     # measurements_df = measurements_df.loc[:, neuron_ids]
 
-    sttc(measurements_df, dt=2)
+    if calculate_sttc:
+        sttc_matrix = sttc(measurements_df, dt=2, n_jobs=4, write_dir='results')

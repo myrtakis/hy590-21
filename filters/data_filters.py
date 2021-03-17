@@ -8,10 +8,12 @@ def keep_neurons_of_area(membership_df, area=None):
 def keep_neurons_of_firing_rate(measurements_df, frate=None):
     if frate is None:
         return list(measurements_df.columns)
-    # TODO needs completion to filter neuros with firing rate < 0.01 Hz
+    frame_duration = 0.158
+    frate_per_neuron = measurements_df.sum(axis=0) / measurements_df.shape[0] / frame_duration
+    return frate_per_neuron[frate_per_neuron > frate].index
 
 
-def keep_neurons_of_coords(coords_df, axis=None, coord_value=None):
-    if axis is None and coord_value is None:
+def keep_neurons_of_coords(coords_df, axis=None, coord_func=None):
+    if axis is None:
         return coords_df['neuron_id']
-    # TODO needs completion to filter neurons with 100-300 μm from the z coordinate of cords_df
+    return coords_df[coords_df[axis].apply(coord_func)].loc[:, 'neuron_id']
