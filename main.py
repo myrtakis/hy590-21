@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # measurements_df = pd.read_csv(os.path.join(args.datadir, 'pair_1_1105.csv'))
 
     measurements_df.columns = np.arange(measurements_df.shape[1]) + 1    # To have a unified neuron id naming schema
-    measurements_df = measurements_df.loc[:3300, :]     # 3300 is the final frame for the 8 minute recording period as required by the task
+    # measurements_df = measurements_df.loc[:3300, :]     # 3300 is the final frame for the 8 minute recording period as required by the task
 
     neuron_ids = boundaries_df['x']
     neuron_ids = data_filters.keep_neurons_of_area(cell_memb_df[cell_memb_df['neuronID'].apply(lambda x: x in neuron_ids)], 'V1')

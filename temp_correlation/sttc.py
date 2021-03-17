@@ -18,7 +18,7 @@ def sttc(measurements_df, dt, n_jobs=1, write_dir=None):
 
     results = []
 
-    for partition_pairs in np.split(np.array(neuron_pairs), n_jobs):
+    for partition_pairs in np.array_split(np.array(neuron_pairs), n_jobs):
         results.append(sttc_for_pairs.remote(measurements_df, dt, partition_pairs))
 
     final_res = []
