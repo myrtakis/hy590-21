@@ -13,7 +13,6 @@ def sttc(measurements_df, dt, n_jobs=1, write_dir=None):
 
     assert measurements_df.shape[1] >= 2
     neuron_pairs = list(combinations(list(measurements_df.columns), 2))
-    neuron_pairs = [neuron_pairs[0] for _ in range(100)]
 
     col_names = ['NeuronA', 'NeuronB', 'STTC', 'CtrlGrpMean', 'CtrlGrpStDev', 'NullSTTC', 'zscore']
 
