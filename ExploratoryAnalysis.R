@@ -5,14 +5,14 @@ library(data.table)
 library(readr)
 library(plotly)
 
-path.to.data <- 'D:\\Downloads\\mouse 4 (24705), first 8min interval'
+path.to.data <- 'D:\\hy590-data\\'
 
-files <- list.files( path.to.data, full.names = T)
+files <- list.files(path.to.data, full.names = T)
 
-spiketrain_1.5 <- read.csv( files[6])
+spiketrain_1.5 <- read.csv(files[6])
 
 #Plot spiketrain and deconvolved
-thisMouse = 17797
+thisMouse = 4
 
 sessionNumber = mouseInfo$sessionNumber[mouseInfo$MouseID == thisMouse]
 scanIndex = mouseInfo$scanIndex[mouseInfo$MouseID == thisMouse]
@@ -23,18 +23,18 @@ scanIndex = mouseInfo$scanIndex[mouseInfo$MouseID == thisMouse]
 #spiketrain_2 = as.data.frame(read.general(paste0("m_", "NewThreshold_2dc"), thisMouse))
 #spiketrain_3 = as.data.frame(read.general(paste0("m_", "NewThreshold_3dc"), thisMouse))
 
+spiketrain_1.5 <- as.data.frame(fread(files[6]))
+
 # df/f
-spiketrain_1.5 <- as.data.frame(fread(paste0(files[6])))
+df_f <- as.data.frame(fread(files[grepl("df_f",files)]))
+colnames(df_f) <- gsub("Neuron","V",colnames(df_f))
+
 # Deconvolved
-deconvolved = as.matrix(fread(paste0("~/Data/General/mouse_",
-                                     thisMouse, "/s",
-                                     sessionNumber, "_idx",
-                                     scanIndex, "_deconvolved.csv")))
+deconvolved <- as.data.frame(fread(files[grepl("deconvolved",files)]))
+dim(deconvolved)
 # Fluorescence
-fluorescense = as.matrix(fread(paste0("~/Data/General/mouse_",
-                                      thisMouse, "/s",
-                                      sessionNumber, "_idx",
-                                      scanIndex, "_fluorescense.csv")))
+
+fluorescense <-  as.matrix(fread(files[grepl("fluorescense",files)]))
 
 #Set seed, for picking the same random neurons to plot each time
 set.seed(1)
@@ -48,6 +48,7 @@ set.seed(seed = NULL)
 
 for (neuronID in sampleNeurons) {
   
+  neuronID <- sampleNeurons[1]
   nameOfPlot = paste0("~/ITE/SideridisLog/Results/firingEventsVsDeconvolved/mouse-",
                       thisMouse, "_neuron-",
                       neuronID, ".rds")
@@ -55,15 +56,14 @@ for (neuronID in sampleNeurons) {
   if(!file.exists(nameOfPlot)){
     
     thisdf = data.frame("frames" = seq(nrow(spiketrain_1.5)),
-                        "spiketrain_1.5" = ifelse(spiketrain_1.5[,neuronID] == 1, 0, NA))
-                        # "df_f" = df_f[,neuronID],
-                        # "deconvolved" = deconvolved[,neuronID],
-                        # "fluorescense" = fluorescense[,neuronID],
+                        #"df_f" = df_f[,neuronID],
+                        "deconvolved" = deconvolved[,neuronID],
+                        #"fluorescense" = fluorescense[,neuronID],
                         # "spiketrain_0.5" = ifelse(spiketrain_0.5[,neuronID] == 1, 0, NA),
-                        # "spiketrain_1.5" = ifelse(spiketrain_1.5[,neuronID] == 1, 0, NA),
+                         "spiketrain_1.5" = ifelse(spiketrain_1.5[,neuronID] == 1, 0, NA))
                         # "spiketrain_2" = ifelse(spiketrain_2[,neuronID] == 1, 0, NA),
                         # "spiketrain_3" = ifelse(spiketrain_3[,neuronID] == 1, 0, NA))
-                        # 
+    
     fig <- plot_ly(thisdf, x = ~frames) 
     
     fig <- fig %>% add_trace(y = ~deconvolved,
@@ -125,3 +125,15 @@ for (neuronID in sampleNeurons) {
     saveRDS(fig, nameOfPlot)
   }
 }
+
+thisdf$spiketrain_1.5 <- ifelse(is.na(thisdf$spiketrain_1.5), 0, 1)
+thisdf$frames <- NULL
+#glm_model <- glm(Diagnose1  ~ ., family = binomial(), training_cohort)
+glm_model <- glm(deconvolved  ~ ., family = gaussian(), thisdf)
+
+summary(glm_model)
+anova(glm_model, test="Chisq")
+
+lm_model <- lm(deconvolved ~ ., data = thisdf)
+summary(lm_model)
+anova(lm_model)
