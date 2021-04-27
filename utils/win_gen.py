@@ -21,14 +21,17 @@ class WindowGenerator():
 
         # Work out the label column indices.
         self.label_columns = label_columns
+        
         self.input_columns = input_columns
         if label_columns is not None:
             self.label_columns_indices = {name: i for i, name in
                                           enumerate(label_columns)}
-            
+        
+        ##### additional code block
         if input_columns is not None:
             self.input_columns_indices = {name: i for i, name in
                                           enumerate(input_columns)}
+        #####
             
         self.column_indices = {name: i for i, name in
                                enumerate(train_df.columns)}
@@ -53,9 +56,10 @@ class WindowGenerator():
         if self.label_columns is not None:
             labels = tf.stack([labels[:, :, self.column_indices[name]] for name in self.label_columns], axis=-1)
             
+        ##### additional code block
         if self.input_columns is not None:
             inputs = tf.stack([inputs[:, :, self.column_indices[name]] for name in self.input_columns], axis=-1)
-
+        #####
     
         # Slicing doesn't preserve static shape information, so set the shapes
         # manually. This way the `tf.data.Datasets` are easier to inspect.
