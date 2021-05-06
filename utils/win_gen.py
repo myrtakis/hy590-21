@@ -77,6 +77,7 @@ def split_window(self, features):
 
     return inputs, labels
 ## exempaly data
+### Fold <=> data
 data = pd.DataFrame(np.random.rand(400,5))
 
 #column_indices = {name: i for i, name in enumerate(data.columns)}
@@ -91,6 +92,10 @@ WindowGenerator.split_window = split_window
 example_window = tf.stack([np.array(data[:w1.total_window_size]),
                            np.array(data[100:100+w1.total_window_size]),
                            np.array(data[200:200+w1.total_window_size])])
+
+
+example_window = tf.stack([np.array(data[:w1.total_window_size])])
+
 
 
 example_inputs, example_labels = w1.split_window(features = example_window)
@@ -116,6 +121,8 @@ def make_dataset(self, data):
   return ds
 
 WindowGenerator.make_dataset = make_dataset
+
+w1.make_dataset(data)
 
 @property
 def train(self):
@@ -143,5 +150,12 @@ def example(self):
 WindowGenerator.train = data
 #WindowGenerator.val = val
 #WindowGenerator.test = test
-#WindowGenerator.example = example
+WindowGenerator.example = example
 
+
+# Each element is an (inputs, label) pair
+w1.train.element_spec
+
+for example_inputs, example_labels in w1.train.take(1):
+  print(f'Inputs shape (batch, time, features): {example_inputs.shape}')
+  print(f'Labels shape (batch, time, features): {example_labels.shape}')
