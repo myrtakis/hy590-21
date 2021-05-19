@@ -18,9 +18,18 @@
     "shift": 1
   },
   "model": {
-    "name": "linear",
+    "name": "fc",
     "params": {
-
+      "units_per_hidden_layer": [
+        3,5
+      ],
+      "regularization": {
+        "l1": "1e-3",
+        "l2": "0",
+        "dropout": 0
+      },
+      "activation": "linear",
+      "task": "regression"
     }
   }
 }

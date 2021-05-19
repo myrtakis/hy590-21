@@ -1,4 +1,4 @@
-from models.linear import Linear
+from models.fully_connected import FullyConnected
 from models.earlystoppingbylossval import EarlyStoppingByLossVal
 from utils.win_gen import *
 from utils.eval_protocol import ForwardChainCV
@@ -48,16 +48,14 @@ class Processor:
             self.test_df = self.data_df.iloc[test_inds, :]
             window = self.__build_window__()
             model = self.__find_model__()
-            print(window.train.element_spec[0].shape," -- ",window.train.element_spec[1].shape)
-            #exit(0)
             model.build_model(setting_configuration=self.settings_config,
                               window_config = self.window_config,
-                              model_config = self.model_config,
+                              model_params = self.model_config['params'],
                               input_dim = window.train.element_spec[0].shape[-1],
-                              output_dim = window.train.element_spec[1].shape)
+                              output_dim = window.train.element_spec[1].shape[-1])
             
-            #model.fit_model(window.train, window.val, callbacks = EarlyStoppingByLossVal('val_loss',stoppingValue=0.05))
-            #perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
-            #perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
-            #fold += 1
-        #print(perfomances)
+            model.fit_model(window.train, window.val, callbacks = EarlyStoppingByLossVal('val_loss',stoppingValue=0.05))
+            perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
+            perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
+            fold += 1
+        print(perfomances)

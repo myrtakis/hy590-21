@@ -9,7 +9,7 @@ from tensorflow.keras.callbacks import Callback
 
 class EarlyStoppingByLossVal(Callback):
 
-    def __init__(self,monitor,stoppingValue,file):
+    def __init__(self,monitor,stoppingValue,file=None):
         super(Callback, self).__init__()
         self.monitor = monitor
         self.stoppingValue=stoppingValue

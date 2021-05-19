@@ -32,4 +32,3 @@ if __name__ == '__main__':
     
     proc = Processor(data, read_pipeline_configs(), column_ids(data, 'L4'), column_ids(data, 'L23'))
     proc.train_evaluate_model()
-    #'model': {'name': 'fc', 'params': ([],task = 'regression]

@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Input, Dense ,Dropout
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras import optimizers,regularizers
+from utils.helpers import get_or_default
 
 
 class FullyConnected():
@@ -10,7 +11,7 @@ class FullyConnected():
     def __init__(self):
         self.fc = None
 
-    def build_model(self, setting_configuration, window_config, model_config, input_dim, output_dim):
+    def build_model(self, setting_configuration, window_config, model_params, input_dim, output_dim):
         
         ### about DNN Configurarations - Fully Connected Layers
         ### number of hidden layers - DNN width 
@@ -26,26 +27,29 @@ class FullyConnected():
         #)
         
         model=tf.keras.Sequential()
-                
-        params = ([30,40,20],activation, (l1 , l2, drop_out_prob ), task)
-        
         #if window_width >1:
             #tf.Flatten()
-                    
+
+        # setup the parameters robustly
+        activation = get_or_default(model_params, 'activation', None)
+        l1_alpha = float(get_or_default(model_params['regularization'], 'l1', 0))
+        l2_alpha = float(get_or_default(model_params['regularization'], 'l2', 0))
+        dropout = float(get_or_default(model_params['regularization'], 'dropout', 0))
+
         #weights=[w,np.random.random(w.shape[1])],
         model.add(tf.keras.Input(shape=(input_dim,)))
-        act='sigmoid'
-        
+
         ### add hidden layers
-        for layers in i,w in paramrs:          
-                act='linear'
-            
-            model.add(Dense(w.shape[1] ,  activation = act,
+        for units_per_layer in model_params['units_per_hidden_layer']:
+            model.add(Dense(units_per_layer,  activation = activation,
                             #weights= [w,0.001*np.random.random(w.shape[1])],
-                            activity_regularizer=tf.keras.regularizers.l1_l2(l1=10**(-5),l2=10**(-5))))
-             model.add(Dropout(0.10))
+                            activity_regularizer=tf.keras.regularizers.l1_l2(l1=l1_alpha, l2=l2_alpha)))
+            model.add(Dropout(dropout))
+
+        model.add(Dense(output_dim, activation = 'linear'))
         
-        model.add()
+        # model.add()
+        self.fc = model
         self.fc.compile(loss=setting_configuration['loss'], metrics=setting_configuration['metrics'],
                             optimizer=setting_configuration['optimizer'])
         
