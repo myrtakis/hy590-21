@@ -1,6 +1,8 @@
 from models.linear import Linear
+from models.earlystoppingbylossval import EarlyStoppingByLossVal
 from utils.win_gen import *
 from utils.eval_protocol import ForwardChainCV
+
 
 
 class Processor:
@@ -23,7 +25,7 @@ class Processor:
 
     def __find_model__(self):
         model_dispatcher = {
-            'linear': Linear
+            'fc': FullyConnected
         }
         return model_dispatcher[self.model_config['name']]()
 
@@ -32,6 +34,7 @@ class Processor:
         return WindowGenerator(input_width=wc['input_width'], label_width=wc['label_width'], shift=wc['shift'],
                                train_df=self.train_df, val_df=self.val_df, test_df=self.test_df,
                                input_columns=self.input_column_ids, label_columns=self.label_column_ids)
+    
 
     def train_evaluate_model(self):
         fw = ForwardChainCV(self.eval_protocol_config)
@@ -45,9 +48,16 @@ class Processor:
             self.test_df = self.data_df.iloc[test_inds, :]
             window = self.__build_window__()
             model = self.__find_model__()
-            model.build_model(setting_configuration=self.settings_config)
-            model.fit_model(window.train, window.val)
-            perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
-            perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
-            fold += 1
-        print(perfomances)
+            print(window.train.element_spec[0].shape," -- ",window.train.element_spec[1].shape)
+            #exit(0)
+            model.build_model(setting_configuration=self.settings_config,
+                              window_config = self.window_config,
+                              model_config = self.model_config,
+                              input_dim = window.train.element_spec[0].shape[-1],
+                              output_dim = window.train.element_spec[1].shape)
+            
+            #model.fit_model(window.train, window.val, callbacks = EarlyStoppingByLossVal('val_loss',stoppingValue=0.05))
+            #perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
+            #perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
+            #fold += 1
+        #print(perfomances)
