@@ -21,7 +21,6 @@
     "name": "fc",
     "params": {
       "units_per_hidden_layer": [
-        3,5
       ],
       "regularization": {
         "l1": "1e-3",

@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 #### before the windowing step we need to determine the cross-validation folds
 #### by splitting the time series according to the indexing of the output timeseries
