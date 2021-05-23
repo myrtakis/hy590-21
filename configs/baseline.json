@@ -3,7 +3,7 @@
     "loss": "mse",
     "metrics": ["mae"],
     "optimizer": "Adam",
-    "epochs": 20
+    "epochs": 1
   },
   "evaluation_protocol": {
     "mode": "expanding",

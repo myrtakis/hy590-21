@@ -47,17 +47,13 @@ class FullyConnected():
             model.add(Dropout(dropout))
 
         model.add(Dense(output_dim, activation = 'linear'))
-        
-        # model.add()
+
         self.fc = model
         self.fc.compile(loss=setting_configuration['loss'], metrics=setting_configuration['metrics'],
                             optimizer=setting_configuration['optimizer'])
-        
-        
+
     def fit_model(self, Xtrain, Xval, epochs=20, callbacks=None):
-        
-        history = self.fc.fit(Xtrain, epochs=epochs, validation_data=Xval)
-        
+        history = self.fc.fit(Xtrain, epochs=epochs, validation_data=Xval, callbacks=callbacks)
         return history
 
     def get_instance(self):

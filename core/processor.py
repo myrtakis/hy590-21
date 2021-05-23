@@ -2,15 +2,17 @@ from models.fully_connected import FullyConnected
 from models.earlystoppingbylossval import EarlyStoppingByLossVal
 from utils.win_gen import *
 from utils.eval_protocol import ForwardChainCV
-
+import json
 
 
 class Processor:
 
-    def __init__(self, data_df, pipeline_configs, input_column_ids, label_column_ids):
+    def __init__(self, data_df, config_name, pipeline_configs, input_column_ids, label_column_ids):
         self.data_df = data_df
         self.input_column_ids = input_column_ids
         self.label_column_ids = label_column_ids
+
+        self.filepath = 'environment/' + config_name
 
         # Set configurations from the pipeline_configs instance
         self.settings_config = pipeline_configs['settings']
@@ -41,7 +43,7 @@ class Processor:
         perfomances = {'validation': {}, 'test':{}}
         fold = 1
         for train_inds, val_inds, test_inds in fw.split(self.data_df):
-            fold_name = 'Fold ' + str(fold)
+            fold_name = 'fold_' + str(fold)
             print('\n', fold_name)
             self.train_df = self.data_df.iloc[train_inds, :]
             self.val_df = self.data_df.iloc[val_inds, :]
@@ -53,9 +55,26 @@ class Processor:
                               model_params = self.model_config['params'],
                               input_dim = window.train.element_spec[0].shape[-1],
                               output_dim = window.train.element_spec[1].shape[-1])
-            
-            model.fit_model(window.train, window.val, callbacks = EarlyStoppingByLossVal('val_loss',stoppingValue=0.05))
+
+            model.fit_model(window.train, window.val, callbacks = self.get_callbacks(fold_name))
             perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
             perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
+
+
+
             fold += 1
         print(perfomances)
+
+    def get_callbacks(self, fold_name):
+        return [
+            tf.keras.callbacks.ModelCheckpoint(filepath=self.filepath + '/model_weights_' + fold_name + '.ckpt',
+                                                         save_weights_only=True,
+                                                         verbose=1),
+
+            #EarlyStoppingByLossVal('val_loss', stoppingValue=0.05, file=self.filepath)
+        ]
+
+    def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
+        inds_dict = json.dumps({'train': train_inds, 'val': val_inds, 'test': test_inds}, indent=4)
+        with open (self.filepath + '/' + fold_name + '_indices.json') as outfile:
+            json.dump(inds_dict, outfile)

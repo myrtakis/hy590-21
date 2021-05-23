@@ -51,6 +51,9 @@ def filter_neuron_ids(data_dict):
 
 
 if __name__ == '__main__':
+
+    config_name = CONFIGS_PATH.split('.')[0]
+
     data_dict = read_data()
     unify_col_ids(data_dict)
 
@@ -64,5 +67,6 @@ if __name__ == '__main__':
 
     df_f_valid_data = pd.concat([valid_l4_neurons_df_f, valid_l23_neurons_df_f], axis=1)
 
-    proc = Processor(df_f_valid_data, read_pipeline_configs(), valid_l4_neurons_df_f.columns, valid_l23_neurons_df_f.columns)
+    proc = Processor(df_f_valid_data, config_name, read_pipeline_configs(),
+                     valid_l4_neurons_df_f.columns, valid_l23_neurons_df_f.columns)
     proc.train_evaluate_model()
