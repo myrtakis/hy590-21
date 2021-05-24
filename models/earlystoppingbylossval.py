@@ -16,15 +16,16 @@ class EarlyStoppingByLossVal(Callback):
         self.file=file
             
     def on_epoch_end(self, epoch, logs={}):
-        current=logs.get(self.monitor)
+        
+        #current = logs.get(self.monitor)        
         #if current is None:
         #warnings.warn("Early stopping requires %s available!" % self.monitor, RuntimeWarning)
-        if current<=0.5 and self.flag==4:
+        if all(list(map(lambda x:logs.get(x)<=0.5,self.monitor))):
             self.model.save(self.file+'_mse_loss_'+str(0.5)+'.hdf5')
             
-        elif current<=0.05 and self.flag==5:
+        elif all(list(map(lambda x:logs.get(x)<=0.05,self.monitor))) :
             self.model.save(self.file+'mse_loss_'+str(0.05)+'.hdf5')
             
-        elif current<=self.stoppingValue:
-            self.model.save(self.file+'mse_loss_'+str(self.stoppingValue)+'.hdf5')
+        elif all(list(map(lambda x:logs.get(x)<=self.stoppingValue,self.monitor))):
+            self.model.save(self.file+'mse_loss_'+str(self.stoppingValue)+'.hdf5')            
             self.model.stop_training = True

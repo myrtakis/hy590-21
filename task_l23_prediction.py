@@ -8,11 +8,11 @@ from filters import data_filters
 CONFIGS_PATH = 'configs/baseline.json'
 DATA_DIR = 'data'
 
-DF_F_FNAME = 'mouse_24705_s3_idx24_df_f-001.csv'
-CELL_MEMBERSHIP_FNAME   = 'cellMembershipMouse24705.csv'
-COORDS_FNAME            = 'coords.csv'
+DF_F_FNAME = 'mouse_24705_s3_idx24_df_f.csv'
+CELL_MEMBERSHIP_FNAME   = 'mouse24705_cellMembership.csv'
+COORDS_FNAME            = 'mouse24705_coords.csv'
 MEASUREMENTS_FNAME      = 'mouse24705_IoannisThreshold_1.5dc_full_18min.csv'
-BOUNDARIES_FNAME        = 'withinBoundaries_30um.csv'
+BOUNDARIES_FNAME        = 'mouse24705_withinBoundaries_30um.csv'
 
 
 def read_pipeline_configs():

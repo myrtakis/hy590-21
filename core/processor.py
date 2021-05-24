@@ -3,7 +3,10 @@ from models.earlystoppingbylossval import EarlyStoppingByLossVal
 from utils.win_gen import *
 from utils.eval_protocol import ForwardChainCV
 import json
+import matplotlib.pyplot as plt
+import os
 
+import datetime
 
 class Processor:
 
@@ -12,7 +15,10 @@ class Processor:
         self.input_column_ids = input_column_ids
         self.label_column_ids = label_column_ids
 
-        self.filepath = 'environment/' + config_name
+        self.filepath = 'environment/' + config_name +"/"+str(datetime.datetime.now().timestamp())
+        
+        os.makedirs(self.filepath)
+        self.save_configs(pipeline_configs)
 
         # Set configurations from the pipeline_configs instance
         self.settings_config = pipeline_configs['settings']
@@ -31,6 +37,18 @@ class Processor:
         }
         return model_dispatcher[self.model_config['name']]()
 
+    def plot_history (self,history, fold_name):
+         final_dir = self.filepath + '/plots'
+         if not os.path.isdir(final_dir):
+             os.makedirs(final_dir)
+         plt.plot(history.history['loss'])
+         plt.plot(history.history['val_loss'])
+         plt.title(self.filepath + ' ' + fold_name)
+         plt.ylabel('loss')
+         plt.xlabel('epoch')
+         plt.legend(['train', 'val'], loc='upper left')
+         plt.savefig(final_dir + '/' + fold_name + '.png', dpi=300)
+                  
     def __build_window__(self):
         wc = self.window_config
         return WindowGenerator(input_width=wc['input_width'], label_width=wc['label_width'], shift=wc['shift'],
@@ -44,37 +62,58 @@ class Processor:
         fold = 1
         for train_inds, val_inds, test_inds in fw.split(self.data_df):
             fold_name = 'fold_' + str(fold)
-            print('\n', fold_name)
-            self.train_df = self.data_df.iloc[train_inds, :]
+            print('\n', fold_name)        
+            self.train_df = self.data_df.iloc[train_inds, :]            
             self.val_df = self.data_df.iloc[val_inds, :]
             self.test_df = self.data_df.iloc[test_inds, :]
+            
             window = self.__build_window__()
+            
             model = self.__find_model__()
+            
             model.build_model(setting_configuration=self.settings_config,
                               window_config = self.window_config,
                               model_params = self.model_config['params'],
                               input_dim = window.train.element_spec[0].shape[-1],
                               output_dim = window.train.element_spec[1].shape[-1])
 
-            model.fit_model(window.train, window.val, callbacks = self.get_callbacks(fold_name))
+            history = model.fit_model(window.train, window.val, epochs=self.settings_config['epochs'], callbacks = self.get_callbacks(fold_name))
+                        
             perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
             perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
-
-
-
+            
+            ######
+            #print("############ Evaluation based on saved models")            
+            #new_model = tf.keras.models.load_model('environment/configs/baseline/model_final'+ fold_name + '.ckpt')                                          
+            #print(new_model.evaluate(window.val))
+            #print(new_model.evaluate(window.test))            
+            #####
+                                             
+            self.plot_history(history, fold_name)
+            ### Fix it  
+            #self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
+            
             fold += 1
         print(perfomances)
+            
+        
 
     def get_callbacks(self, fold_name):
         return [
-            tf.keras.callbacks.ModelCheckpoint(filepath=self.filepath + '/model_weights_' + fold_name + '.ckpt',
-                                                         save_weights_only=True,
+            tf.keras.callbacks.ModelCheckpoint(filepath=self.filepath + '/model_final' + fold_name + '.ckpt',
+                                                         save_weights_only=False,
                                                          verbose=1),
 
-            #EarlyStoppingByLossVal('val_loss', stoppingValue=0.05, file=self.filepath)
+            EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
-
+    ### Fix it 
     def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
-        inds_dict = json.dumps({'train': train_inds, 'val': val_inds, 'test': test_inds}, indent=4)
-        with open (self.filepath + '/' + fold_name + '_indices.json') as outfile:
+        inds_dict = json.dumps({'train': list(train_inds), 'val': list(val_inds), 'test': list(test_inds)}, indent=4)
+        with open (self.filepath + '/' + fold_name + '_indices.json', 'w') as outfile:
             json.dump(inds_dict, outfile)
+            
+    def save_configs(self, pipeline_configs):
+        with open(self.filepath + '/config.json', 'w') as outfile:
+            json.dump(pipeline_configs, outfile)
+            
+            

@@ -31,7 +31,10 @@ class ForwardChainCV:
             yield self.__fold_partitioning__(fold)
 
     def __fixed_sliding__(self, X):
-        pass
+        all_inds = np.arange(0, X.shape[0])
+        parts = np.array_split(all_inds, self.folds)
+        for fold in parts:
+            yield self.__fold_partitioning__(fold)
 
     def __non_overlapping_transfer_learning__(self, X):
         pass
