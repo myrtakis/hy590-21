@@ -106,12 +106,7 @@ class Processor:
 
             EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
-<<<<<<< HEAD
     
-    ### Fix it 
-=======
-
->>>>>>> b57d322fec3416b4274cc43fafb5ec33196dc4d2
     def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
         inds_dict = {'train': train_inds.tolist(), 'val': val_inds.tolist(), 'test': test_inds.tolist()}
         with open (self.filepath + '/' + fold_name + '_indices.json', 'w') as outfile:
