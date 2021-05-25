@@ -62,7 +62,8 @@ class Processor:
         fold = 1
         for train_inds, val_inds, test_inds in fw.split(self.data_df):
             fold_name = 'fold_' + str(fold)
-            print('\n', fold_name)        
+            print('\n', fold_name)
+            self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
             self.train_df = self.data_df.iloc[train_inds, :]            
             self.val_df = self.data_df.iloc[val_inds, :]
             self.test_df = self.data_df.iloc[test_inds, :]
@@ -90,8 +91,8 @@ class Processor:
             #####
                                              
             self.plot_history(history, fold_name)
-            ### Fix it  
-            #self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
+
+            self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
         print(perfomances)
@@ -106,9 +107,9 @@ class Processor:
 
             EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
-    ### Fix it 
+
     def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
-        inds_dict = json.dumps({'train': list(train_inds), 'val': list(val_inds), 'test': list(test_inds)}, indent=4)
+        inds_dict = {'train': train_inds.tolist(), 'val': val_inds.tolist(), 'test': test_inds.tolist()}
         with open (self.filepath + '/' + fold_name + '_indices.json', 'w') as outfile:
             json.dump(inds_dict, outfile)
             
