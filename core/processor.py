@@ -48,7 +48,8 @@ class Processor:
          plt.xlabel('epoch')
          plt.legend(['train', 'val'], loc='upper left')
          plt.savefig(final_dir + '/' + fold_name + '.png', dpi=300)
-                  
+         plt.figure()
+         
     def __build_window__(self):
         wc = self.window_config
         return WindowGenerator(input_width=wc['input_width'], label_width=wc['label_width'], shift=wc['shift'],
@@ -94,9 +95,7 @@ class Processor:
             #self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
-        print(perfomances)
-            
-        
+        print(perfomances)                
 
     def get_callbacks(self, fold_name):
         return [
@@ -106,6 +105,7 @@ class Processor:
 
             EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
+    
     ### Fix it 
     def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
         inds_dict = json.dumps({'train': list(train_inds), 'val': list(val_inds), 'test': list(test_inds)}, indent=4)
