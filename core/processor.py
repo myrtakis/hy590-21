@@ -96,7 +96,8 @@ class Processor:
             self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
-        print(perfomances)                
+        print(perfomances)
+        self.save_performances(perfomances)
 
     def get_callbacks(self, fold_name):
         return [
@@ -106,6 +107,10 @@ class Processor:
 
             EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
+
+    def save_performances(self, perfomances):
+        with open(self.filepath + '/performances.json', 'w') as outfile:
+            json.dump(perfomances, outfile)
     
     def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
         inds_dict = {'train': train_inds.tolist(), 'val': val_inds.tolist(), 'test': test_inds.tolist()}
