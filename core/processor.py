@@ -112,7 +112,7 @@ class Processor:
             self.plot_history(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
 
             self.__save_history__(history, fold_name)
-            
+                        
             self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
@@ -121,11 +121,11 @@ class Processor:
 
     def get_callbacks(self, fold_name):
         return [
-            tf.keras.callbacks.ModelCheckpoint(filepath=self.filepath + '/model_final' + fold_name + '.ckpt',
+            tf.keras.callbacks.ModelCheckpoint(filepath=self.filepath + '/'+fold_name+'/model_epoch_{epoch:03d}.hdf5',
                                                          save_weights_only=False,
-                                                         verbose=1),
-
-            EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
+                                                         verbose=1,
+                                                         period= 1),
+            #EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
 
     def save_performances(self, perfomances):
