@@ -52,7 +52,7 @@ def filter_neuron_ids(data_dict):
 
 if __name__ == '__main__':
 
-    config_name = CONFIGS_PATH.split('.')[0].split("/")[-1]
+    config_name = CONFIGS_PATH.split('.')[0]
 
     data_dict = read_data()
     unify_col_ids(data_dict)
