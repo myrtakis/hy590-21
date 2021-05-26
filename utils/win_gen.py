@@ -14,13 +14,14 @@ class WindowGenerator:
     # shift: Lag between input and output features
     # input_columns: It is a new paramater that differentiates the feature domains between input(independent) and output(depedent) variables
     # across the population.
-    def __init__(self, input_width, label_width, shift, train_df, val_df, test_df, label_columns=None,
-                 input_columns=None):
+    def __init__(self, input_width, label_width, shift, train_df, val_df, test_df, settings_config, label_columns=None, input_columns=None):
         # Store the raw data.
         self.train_df = train_df
         self.val_df = val_df
         self.test_df = test_df
 
+        self.settings_config = settings_config
+        
         # Work out the label column indices.
         self.label_columns = label_columns
         self.input_columns = input_columns
@@ -96,7 +97,7 @@ class WindowGenerator:
             sequence_length=self.total_window_size,
             sequence_stride=1,
             shuffle=False,
-            batch_size=32)
+            batch_size=self.settings_config['batch_size'] if 'batch_size' in self.settings_config else 32)
 
         ds = ds.map(self.split_window)
 

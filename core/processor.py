@@ -19,7 +19,8 @@ class Processor:
         
         os.makedirs(self.filepath)
         self.save_configs(pipeline_configs)
-
+            
+        self.config_name = config_name
         # Set configurations from the pipeline_configs instance
         self.settings_config = pipeline_configs['settings']
         self.eval_protocol_config = pipeline_configs['evaluation_protocol']
@@ -41,20 +42,36 @@ class Processor:
          final_dir = self.filepath + '/plots'
          if not os.path.isdir(final_dir):
              os.makedirs(final_dir)
+                     
          plt.plot(history.history['loss'])
          plt.plot(history.history['val_loss'])
-         plt.title(self.filepath + ' ' + fold_name)
+         plt.title(self.config_name + ' ' + self.eval_protocol_config['mode']+  ' ' + fold_name)
          plt.ylabel('loss')
          plt.xlabel('epoch')
          plt.legend(['train', 'val'], loc='upper left')
+         
          plt.savefig(final_dir + '/' + fold_name + '.png', dpi=300)
          plt.figure()
          
+    def __save_history__(self, history, fold_name):
+        
+        final_dir = self.filepath + '/train_val_performances'
+        if not os.path.isdir(final_dir):
+            os.makedirs(final_dir)
+        
+        with open (final_dir +'/' + fold_name + '.json', 'w') as outfile:
+            json.dump(history.history, outfile)    
+        #history.history['loss']
+        #history.history['val_loss']
+        #history.history['test_loss']
+        
+        
+        
     def __build_window__(self):
         wc = self.window_config
         return WindowGenerator(input_width=wc['input_width'], label_width=wc['label_width'], shift=wc['shift'],
                                train_df=self.train_df, val_df=self.val_df, test_df=self.test_df,
-                               input_columns=self.input_column_ids, label_columns=self.label_column_ids)
+                               settings_config = self.settings_config, input_columns=self.input_column_ids, label_columns=self.label_column_ids)
     
 
     def train_evaluate_model(self):
@@ -81,7 +98,8 @@ class Processor:
 
             history = model.fit_model(window.train, window.val, epochs=self.settings_config['epochs'], callbacks = self.get_callbacks(fold_name))
                         
-            perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
+            #perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
+            
             perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
             
             ######
@@ -93,6 +111,8 @@ class Processor:
                                              
             self.plot_history(history, fold_name)
 
+            self.__save_history__(history, fold_name)
+            
             self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
