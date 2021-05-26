@@ -45,7 +45,7 @@ class Processor:
                      
          plt.plot(history.history['loss'])
          plt.plot(history.history['val_loss'])
-         plt.title(self.config_name + ' ' + self.eval_protocol_config['mode']+  ' ' + fold_name)
+         plt.title(self.config_name.split("/")[-1] + ' ' + self.eval_protocol_config['mode']+  ' ' + fold_name)
          plt.ylabel('loss')
          plt.xlabel('epoch')
          plt.legend(['train', 'val'], loc='upper left')
