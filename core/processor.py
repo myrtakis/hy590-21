@@ -38,14 +38,14 @@ class Processor:
         }
         return model_dispatcher[self.model_config['name']]()
 
-    def plot_history (self,history, fold_name):
+    def plot_history (self,history, fold_name, frame_interval):
          final_dir = self.filepath + '/plots'
          if not os.path.isdir(final_dir):
              os.makedirs(final_dir)
                      
          plt.plot(history.history['loss'])
          plt.plot(history.history['val_loss'])
-         plt.title(self.config_name.split("/")[-1] + ' ' + self.eval_protocol_config['mode']+  ' ' + fold_name)
+         plt.title(self.config_name + ' - ' + self.eval_protocol_config['mode']+  ' - ' + fold_name+'\nframe interval '+str(frame_interval))
          plt.ylabel('loss')
          plt.xlabel('epoch')
          plt.legend(['train', 'val'], loc='upper left')
@@ -109,7 +109,7 @@ class Processor:
             #print(new_model.evaluate(window.test))            
             #####
                                              
-            self.plot_history(history, fold_name)
+            self.plot_history(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
 
             self.__save_history__(history, fold_name)
             
