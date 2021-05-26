@@ -1,4 +1,5 @@
 from models.fully_connected import FullyConnected
+from models.naive_classifier import Naive
 from models.earlystoppingbylossval import EarlyStoppingByLossVal
 from utils.win_gen import *
 from utils.eval_protocol import ForwardChainCV
@@ -18,7 +19,7 @@ class Processor:
         self.filepath = 'environment/' + config_name +"/"+str(datetime.datetime.now().timestamp())
         
         os.makedirs(self.filepath)
-        self.save_configs(pipeline_configs)
+        self.__save_configs__(pipeline_configs)
             
         self.config_name = config_name
         # Set configurations from the pipeline_configs instance
@@ -34,11 +35,12 @@ class Processor:
 
     def __find_model__(self):
         model_dispatcher = {
-            'fc': FullyConnected
+            'fc': FullyConnected,
+            'naive': Naive
         }
         return model_dispatcher[self.model_config['name']]()
 
-    def plot_history (self,history, fold_name, frame_interval):
+    def __plot_history__ (self, history, fold_name, frame_interval):
          final_dir = self.filepath + '/plots'
          if not os.path.isdir(final_dir):
              os.makedirs(final_dir)
@@ -60,19 +62,13 @@ class Processor:
             os.makedirs(final_dir)
         
         with open (final_dir +'/' + fold_name + '.json', 'w') as outfile:
-            json.dump(history.history, outfile)    
-        #history.history['loss']
-        #history.history['val_loss']
-        #history.history['test_loss']
-        
-        
+            json.dump(history.history, outfile)
         
     def __build_window__(self):
         wc = self.window_config
         return WindowGenerator(input_width=wc['input_width'], label_width=wc['label_width'], shift=wc['shift'],
                                train_df=self.train_df, val_df=self.val_df, test_df=self.test_df,
                                settings_config = self.settings_config, input_columns=self.input_column_ids, label_columns=self.label_column_ids)
-    
 
     def train_evaluate_model(self):
         fw = ForwardChainCV(self.eval_protocol_config)
@@ -81,7 +77,7 @@ class Processor:
         for train_inds, val_inds, test_inds in fw.split(self.data_df):
             fold_name = 'fold_' + str(fold)
             print('\n', fold_name)
-            self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
+            self.__save_fold_incides__(fold_name, train_inds, val_inds, test_inds)
             self.train_df = self.data_df.iloc[train_inds, :]            
             self.val_df = self.data_df.iloc[val_inds, :]
             self.test_df = self.data_df.iloc[test_inds, :]
@@ -109,15 +105,15 @@ class Processor:
             #print(new_model.evaluate(window.test))            
             #####
                                              
-            self.plot_history(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
+            self.__plot_history__(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
 
             self.__save_history__(history, fold_name)
                         
-            self.save_fold_incides(fold_name, train_inds, val_inds, test_inds)
+            self.__save_fold_incides__(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
         print(perfomances)
-        self.save_performances(perfomances)
+        self.__save_performances__(perfomances)
 
     def get_callbacks(self, fold_name):
         return [
@@ -128,17 +124,16 @@ class Processor:
             #EarlyStoppingByLossVal(['val_loss'], stoppingValue=0.05, file=self.filepath+'/model_earlystopped/'+fold_name)
         ]
 
-    def save_performances(self, perfomances):
+    def __save_performances__(self, perfomances):
         with open(self.filepath + '/performances.json', 'w') as outfile:
             json.dump(perfomances, outfile)
     
-    def save_fold_incides(self, fold_name, train_inds, val_inds, test_inds):
+    def __save_fold_incides__(self, fold_name, train_inds, val_inds, test_inds):
         inds_dict = {'train': train_inds.tolist(), 'val': val_inds.tolist(), 'test': test_inds.tolist()}
         with open (self.filepath + '/' + fold_name + '_indices.json', 'w') as outfile:
             json.dump(inds_dict, outfile)
             
-    def save_configs(self, pipeline_configs):
+    def __save_configs__(self, pipeline_configs):
         with open(self.filepath + '/config.json', 'w') as outfile:
             json.dump(pipeline_configs, outfile)
-            
             
