@@ -14,8 +14,8 @@
     "test_size": 0.1
   },
   "window": {
-    "input_width": 1,
-    "label_width": 1,
+    "input_width": 24,
+    "label_width": 24,
     "shift": 1
   },
   "model": {

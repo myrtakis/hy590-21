@@ -108,7 +108,8 @@ class WindowGenerator:
         plt.figure(figsize=(12, 8))
         plot_col_index = self.column_indices[plot_col]
         max_n = min(max_subplots, len(inputs))
-        for n in range(max_n):            
+        for n in range(max_n):  
+            print("FFF",n)
             plt.subplot(max_n, 1, n+1)
             plt.ylabel(f'{plot_col} [normed]')
             plt.plot(self.input_indices, inputs[n, :, plot_col_index],

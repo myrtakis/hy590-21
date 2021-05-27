@@ -75,6 +75,10 @@ class Processor:
         perfomances = {'validation': {}, 'test':{}}
         fold = 1
         for train_inds, val_inds, test_inds in fw.split(self.data_df):
+            print(fold)
+            if fold != 5:
+                fold  += 1
+                continue
             fold_name = 'fold_' + str(fold)
             print('\n', fold_name)
             self.__save_fold_incides__(fold_name, train_inds, val_inds, test_inds)
@@ -86,30 +90,42 @@ class Processor:
             
             model = self.__find_model__()
             
-            model.build_model(setting_configuration=self.settings_config,
-                              window_config = self.window_config,
-                              model_params = self.model_config['params'],
-                              input_dim = window.train.element_spec[0].shape[-1],
-                              output_dim = window.train.element_spec[1].shape[-1])
+            #model.build_model(setting_configuration=self.settings_config,
+            #                  window_config = self.window_config,
+            #                  model_params = self.model_config['params'],
+            #                  input_dim = window.train.element_spec[0].shape[-1],
+            #                  output_dim = window.train.element_spec[1].shape[-1])
 
-            history = model.fit_model(window.train, window.val, epochs=self.settings_config['epochs'], callbacks = self.get_callbacks(fold_name))
+            #history = model.fit_model(window.train, window.val, epochs=self.settings_config['epochs'], callbacks = self.get_callbacks(fold_name))
                         
             #perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
             
-            perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
+            #perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
             
             ######
             #print("############ Evaluation based on saved models")            
-            #new_model = tf.keras.models.load_model('environment/configs/baseline/model_final'+ fold_name + '.ckpt')                                          
-            #print(new_model.evaluate(window.val))
-            #print(new_model.evaluate(window.test))            
+            
+            new_model = tf.keras.models.load_model('environment/configs/fully_connected/1622130610.438469/'+fold_name+'/model_epoch_005.hdf5')
+            
+            #new_model = tf.keras.models.load_model("environment/configs/baseline/1621975408.097669/model_finalfold_7.ckpt")
+            print(fold_name)
+            new_model.compile(loss=tf.losses.MeanSquaredError(),
+                 metrics=[tf.metrics.MeanAbsoluteError()])
+
+            val_performance = {}
+            performance = {}
+            val_performance['new_model'] = new_model.evaluate(window.val)
+            performance['new_model'] = new_model.evaluate(window.test, verbose=0)
+                        
+            window.plot(new_model)         
+            
             #####
                                              
-            self.__plot_history__(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
+            #self.__plot_history__(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
 
-            self.__save_history__(history, fold_name)
+            #self.__save_history__(history, fold_name)
                         
-            self.__save_fold_incides__(fold_name, train_inds, val_inds, test_inds)
+            #self.__save_fold_incides__(fold_name, train_inds, val_inds, test_inds)
             
             fold += 1
         print(perfomances)
