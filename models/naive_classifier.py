@@ -17,7 +17,7 @@ class Naive:
 
     def build_model(self, setting_configuration, window_config, model_params, input_dim, output_dim):
         self.loss = setting_configuration['loss']
-        self.metric = setting_configuration['metric'][0]
+        self.metric = setting_configuration['metrics'][0]
 
     def fit_model(self, Xtrain, Xval, epochs=20, callbacks=None):
         Xtrain_as_np = self.__convert_tensor_dataset_to_numpy__(Xtrain)
@@ -25,7 +25,8 @@ class Naive:
         self.mean_per_neuron = pd.DataFrame(Xtrain_as_np).mean().values
         train_perf = self.evaluate(Xtrain)
         val_perf = self.evaluate(Xval)
-        history = {'loss': train_perf[0], 'mae': train_perf[1], 'val_loss': val_perf[0], 'val_mae': val_perf[1]}
+        class history:
+            history = {'loss': train_perf[0], 'mae': train_perf[1], 'val_loss': val_perf[0], 'val_mae': val_perf[1]}
         return history
 
     def get_instance(self):

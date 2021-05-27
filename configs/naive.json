@@ -1,7 +1,8 @@
 {
   "settings": {
     "loss": "mse",
-    "metrics": ["mae"]
+    "metrics": ["mae"],
+    "epochs": 0
   },
   "evaluation_protocol": {
     "mode": "expanding",
@@ -16,6 +17,7 @@
     "shift": 1
   },
   "model": {
-    "name": "naive"
+    "name": "naive",
+    "params": {}
   }
 }
