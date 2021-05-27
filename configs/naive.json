@@ -1,5 +1,7 @@
 {
   "settings": {
+    "loss": "mse",
+    "metrics": ["mae"]
   },
   "evaluation_protocol": {
     "mode": "expanding",
