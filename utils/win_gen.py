@@ -146,7 +146,7 @@ class WindowGenerator:
             #plt.ylabel(f'{plot_col_index_input} [normed]')
             plt.ylabel( "All Inputs")
             
-            plt.plot(self.input_indices, inputs[n, :, plot_col_index_inputs[0]:plot_col_index_inputs[-1]], label='Inputs', marker='.', zorder=-10)
+            plt.plot(self.input_indices, tf.reduce_mean(inputs[n, :, plot_col_index_inputs[0]:plot_col_index_inputs[-1]], axis=1), label='Inputs', marker='.', zorder=-10)
             
             if self.label_columns is not None:
                 
@@ -158,12 +158,12 @@ class WindowGenerator:
                 #if label_col_index is None:
                 #    continue
                     
-            plt.scatter(self.label_indices, tf.reshape(labels[n, :, plot_col_index_labels[0]:plot_col_index_labels[-1]],-1),
+            plt.scatter(self.label_indices, tf.reduce_mean(labels[n, :, plot_col_index_labels[0]:plot_col_index_labels[-1]], axis=1),
                         edgecolors='k', label='Labels', c='#2ca02c', s=64)
             
             if model is not None:
                 predictions = model(inputs)
-                plt.scatter(self.label_indices, predictions[n, :, plot_col_index_labels[0]:plot_col_index_labels[-1]],
+                plt.scatter(self.label_indices, tf.reduce_mean(predictions[n, :, plot_col_index_labels[0]:plot_col_index_labels[-1]], axis=1),
                             marker='X', edgecolors='k', label='Predictions',
                              c='#ff7f0e', s=64)
             if n == 0:
