@@ -90,6 +90,7 @@ class Processor:
             
             model = self.__find_model__()
             
+            #####
             #model.build_model(setting_configuration=self.settings_config,
             #                  window_config = self.window_config,
             #                  model_params = self.model_config['params'],
@@ -105,18 +106,20 @@ class Processor:
             ######
             #print("############ Evaluation based on saved models")            
             
-            new_model = tf.keras.models.load_model('environment/configs/fully_connected/1622130610.438469/'+fold_name+'/model_epoch_005.hdf5')
+            #new_model = tf.keras.models.load_model('environment/configs/fully_connected/1622130610.438469/'+fold_name+'/model_epoch_005.hdf5')
             
-            #new_model = tf.keras.models.load_model("environment/configs/baseline/1621975408.097669/model_finalfold_7.ckpt")
+            new_model = tf.keras.models.load_model("environment/configs/baseline/1621975408.097669/model_finalfold_7.ckpt")
+            
             print(fold_name)
+            
             new_model.compile(loss=tf.losses.MeanSquaredError(),
                  metrics=[tf.metrics.MeanAbsoluteError()])
 
             val_performance = {}
             performance = {}
             val_performance['new_model'] = new_model.evaluate(window.val)
-            performance['new_model'] = new_model.evaluate(window.test, verbose=0)
-                        
+            performance['new_model'] = new_model.evaluate(window.test, verbose=0) 
+                       
             window.plot(new_model)         
             
             #####
@@ -127,6 +130,7 @@ class Processor:
                         
             #self.__save_fold_incides__(fold_name, train_inds, val_inds, test_inds)
             
+            ####
             fold += 1
         print(perfomances)
         self.__save_performances__(perfomances)

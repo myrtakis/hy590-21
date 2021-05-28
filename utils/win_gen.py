@@ -90,6 +90,7 @@ class WindowGenerator:
     def test(self):
         return self.make_dataset(self.test_df)
 
+
     def make_dataset(self, data):
         ds = tf.keras.preprocessing.timeseries_dataset_from_array(
             data=np.array(data, dtype=np.float32),
@@ -115,7 +116,7 @@ class WindowGenerator:
             self._example = result        
         return result
     
-    def plot(self, model=None, plot_col = 'T (degC)', max_subplots=3):
+    def plot(self, model=None, plot_col = 'T (degC)', max_subplots=1):
         
         
         
@@ -129,36 +130,40 @@ class WindowGenerator:
         plt.figure(figsize=(12, 8))
         
         plot_col_index_input = self.column_indices[plot_col_input]
-        
+                
         plot_col_index_label = self.column_indices[plot_col_label]
         
-        print(inputs)
-        print(labels)
+        plot_col_index_inputs = [self.input_columns_indices.get(plot_col_input, None) for plot_col_input in self.input_columns_indices.keys()]
+            
+        
+        print(plot_col_index_inputs)
         
         max_n = min(max_subplots, len(inputs))
         for n in range(max_n):  
             print("FFF",n)
             plt.subplot(max_n, 1, n+1)
             
-            plt.ylabel(f'{plot_col_index_input} [normed]')
+            #plt.ylabel(f'{plot_col_index_input} [normed]')
+            plt.ylabel( "All Inputs")
             
-            plt.plot(self.input_indices, inputs[n, :, plot_col_index_input], label='Inputs', marker='.', zorder=-10)
+            plt.plot(self.input_indices, inputs[n, :, plot_col_index_inputs[0]:plot_col_index_inputs[-1]], label='Inputs', marker='.', zorder=-10)
             
             if self.label_columns is not None:
                 
-                plot_col_index_label = self.label_columns_indices.get(plot_col_label, None)
-                
+                #plot_col_index_label = self.label_columns_indices.get(plot_col_label, None)
+                plot_col_index_labels = [self.label_columns_indices.get(plot_col_label, None) for plot_col_label in self.label_columns_indices.keys()]
+                print(plot_col_index_labels)
             #else:                
                 #plot_col_index_label = plot_col_index
                 #if label_col_index is None:
                 #    continue
                     
-            plt.scatter(self.label_indices, labels[n, :, plot_col_index_label],
+            plt.scatter(self.label_indices, tf.reshape(labels[n, :, plot_col_index_labels[0]:plot_col_index_labels[-1]],-1),
                         edgecolors='k', label='Labels', c='#2ca02c', s=64)
             
             if model is not None:
                 predictions = model(inputs)
-                plt.scatter(self.label_indices, predictions[n, :, plot_col_index_label],
+                plt.scatter(self.label_indices, predictions[n, :, plot_col_index_labels[0]:plot_col_index_labels[-1]],
                             marker='X', edgecolors='k', label='Predictions',
                              c='#ff7f0e', s=64)
             if n == 0:
