@@ -14,15 +14,14 @@
     "test_size": 0.1
   },
   "window": {
-    "input_width": 24,
-    "label_width": 24,
+    "input_width": 100,
+    "label_width": 100,
     "shift": 1
   },
   "model": {
     "name": "fc",
     "params": {
-      "units_per_hidden_layer": [  
-          	
+      "units_per_hidden_layer": [            	
       ],
       "regularization": {
         "l1": "1e-3",

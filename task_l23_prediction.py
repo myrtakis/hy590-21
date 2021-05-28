@@ -5,7 +5,7 @@ import json
 import os
 from filters import data_filters
 
-CONFIGS_PATH = 'configs/naive.json'
+CONFIGS_PATH = 'configs/fully_connected.json'
 DATA_DIR = 'data'
 
 DF_F_FNAME = 'mouse_24705_s3_idx24_df_f.csv'
