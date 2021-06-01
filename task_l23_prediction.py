@@ -4,9 +4,7 @@ import numpy as np
 import json
 import os
 from filters import data_filters
-
-CONFIGS_PATH = 'configs/fully_connected.json'
-DATA_DIR = 'data'
+import argparse
 
 DF_F_FNAME = 'mouse_24705_s3_idx24_df_f.csv'
 CELL_MEMBERSHIP_FNAME   = 'mouse24705_cellMembership.csv'
@@ -15,18 +13,18 @@ MEASUREMENTS_FNAME      = 'mouse24705_IoannisThreshold_1.5dc_full_18min.csv'
 BOUNDARIES_FNAME        = 'mouse24705_withinBoundaries_30um.csv'
 
 
-def read_pipeline_configs():
-    with open(CONFIGS_PATH) as json_file:
+def read_pipeline_configs(configs_dir):
+    with open(configs_dir) as json_file:
         return json.load(json_file)
 
 
-def read_data():
+def read_data(data_dir):
     return {
-        'cell_memb_data': pd.read_csv(os.path.join(DATA_DIR, CELL_MEMBERSHIP_FNAME)),
-        'coords_data': pd.read_csv(os.path.join(DATA_DIR, COORDS_FNAME)),
-        'boundaries_data': pd.read_csv(os.path.join(DATA_DIR, BOUNDARIES_FNAME)),
-        # 'measurements_data' : pd.read_csv(os.path.join(DATA_DIR, MEASUREMENTS_FNAME)),
-        'df_f_data': pd.read_csv(os.path.join(DATA_DIR, DF_F_FNAME))
+        'cell_memb_data': pd.read_csv(os.path.join(data_dir, CELL_MEMBERSHIP_FNAME)),
+        'coords_data': pd.read_csv(os.path.join(data_dir, COORDS_FNAME)),
+        'boundaries_data': pd.read_csv(os.path.join(data_dir, BOUNDARIES_FNAME)),
+        # 'measurements_data' : pd.read_csv(os.path.join(data_dir, MEASUREMENTS_FNAME)),
+        'df_f_data': pd.read_csv(os.path.join(data_dir, DF_F_FNAME))
     }
 
 
@@ -50,11 +48,21 @@ def filter_neuron_ids(data_dict):
     return final_ids
 
 
+def build_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--confpath', required=True, help='Example: --confpath copnfigs/naive.json')
+    parser.add_argument('--datadir', required=True, help='Example: --datadir data')
+    parser.add_argument('--savedir', required=False, help='Example: --savedir environment')
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
 
-    config_name = CONFIGS_PATH.split('.')[0]
+    args = build_arguments()
 
-    data_dict = read_data()
+    config_name = args.confpath.split('.')[0]
+
+    data_dict = read_data(args.datadir)
     unify_col_ids(data_dict)
 
     filtered_neuron_ids = filter_neuron_ids(data_dict)
@@ -67,6 +75,6 @@ if __name__ == '__main__':
 
     df_f_valid_data = pd.concat([valid_l4_neurons_df_f, valid_l23_neurons_df_f], axis=1)
 
-    proc = Processor(df_f_valid_data, config_name, read_pipeline_configs(),
+    proc = Processor(df_f_valid_data, args.savedir, config_name, read_pipeline_configs(args.confpath),
                      valid_l4_neurons_df_f.columns, valid_l23_neurons_df_f.columns)
     proc.train_evaluate_model()

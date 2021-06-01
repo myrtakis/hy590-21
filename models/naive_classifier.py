@@ -43,8 +43,15 @@ class Naive:
     def __convert_tensor_dataset_to_numpy__(data):
         if isinstance(data, np.ndarray):
             return data
-        tesnor_dataset_as_np = list(data.as_numpy_iterator())[0][1]
+        output_index = 1
+        tesnor_dataset_as_np = None
+        for t in data:
+            curr_output_neurons = t[output_index].numpy()
+            shape = curr_output_neurons.shape
+            curr_output_neurons = curr_output_neurons.reshape(shape[0], shape[2])
+            if tesnor_dataset_as_np is None:
+                tesnor_dataset_as_np = curr_output_neurons
+            else:
+                tesnor_dataset_as_np = np.vstack((tesnor_dataset_as_np, curr_output_neurons))
         # Reduce the tensor to 2-dimensions
-        tesnor_dataset_as_np = tesnor_dataset_as_np.reshape(tesnor_dataset_as_np.shape[0],
-                                                            tesnor_dataset_as_np.shape[2])
         return tesnor_dataset_as_np

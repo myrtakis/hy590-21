@@ -6,7 +6,7 @@
   },
   "evaluation_protocol": {
     "mode": "expanding",
-    "folds": 5,
+    "folds": 10,
     "train_size": 0.7,
     "val_size": 0.2,
     "test_size": 0.1
