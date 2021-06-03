@@ -116,9 +116,7 @@ class WindowGenerator:
             self._example = result        
         return result
     
-    def plot(self, model=None, plot_col = 'T (degC)', max_subplots=1):
-        
-        
+    def plot(self, model=None, plot_col = 'T (degC)', max_subplots=1):        
         
         plot_col_input = list(self.input_columns_indices.keys())[1]        
         
@@ -133,10 +131,7 @@ class WindowGenerator:
                 
         plot_col_index_label = self.column_indices[plot_col_label]
         
-        plot_col_index_inputs = [self.input_columns_indices.get(plot_col_input, None) for plot_col_input in self.input_columns_indices.keys()]
-            
-        
-        print(plot_col_index_inputs)
+        plot_col_index_inputs = [self.input_columns_indices.get(plot_col_input, None) for plot_col_input in self.input_columns_indices.keys()]            
         
         max_n = min(max_subplots, len(inputs))
         for n in range(max_n):  

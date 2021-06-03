@@ -99,7 +99,15 @@ class Processor:
             perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
             
             perfomances['test'][fold_name] = model.get_instance().evaluate(window.test, verbose=0)
-                                             
+                           
+            ######
+            #print("############ Evaluation based on saved models")            
+            #loaded_model = tf.keras.models.load_model('environment/configs/baseline/model_final'+ fold_name + '.hdf5')                                          
+            #print(loaded_model.evaluate(window.val))
+            #print(loaded_model.evaluate(window.test))              
+            #window.plot(loaded_model)
+            #####   
+               
             self.__plot_history__(history, fold_name, frame_interval = (train_inds[0], test_inds[-1]))
 
             self.__save_history__(history, fold_name)
