@@ -8,18 +8,18 @@ import ray
 # A validating example: for the pair (1, 1105) the STTC = -0.0032, CtrlGrpMean = 0.00038 CtrlGrpStDev = 0.023 and NullSTTC 0.026
 
 
-def sttc(measurements_df, dt, n_jobs=1, write_dir=None):
+def sttc(measurements_df, dt, neuron_pairs, n_jobs=1, write_dir=None, fname=None, calculate_null=False, col_names=None):
     ray.init()
 
     assert measurements_df.shape[1] >= 2
-    neuron_pairs = list(combinations(list(measurements_df.columns), 2))
 
-    col_names = ['NeuronA', 'NeuronB', 'STTC', 'CtrlGrpMean', 'CtrlGrpStDev', 'NullSTTC', 'zscore']
+    if col_names is None:
+        col_names = ['NeuronA', 'NeuronB', 'STTC', 'CtrlGrpMean', 'CtrlGrpStDev', 'NullSTTC', 'zscore']
 
     results = []
 
     for partition_pairs in np.array_split(np.array(neuron_pairs), n_jobs):
-        results.append(sttc_for_pairs.remote(measurements_df, dt, partition_pairs))
+        results.append(sttc_for_pairs.remote(measurements_df, dt, partition_pairs, calculate_null))
 
     final_res = []
     for r in results:
@@ -29,22 +29,26 @@ def sttc(measurements_df, dt, n_jobs=1, write_dir=None):
     if write_dir is not None:
         if not os.path.isdir('results'):
             os.mkdir('results')
-        sttc_matrix.to_csv(os.path.join(write_dir, 'sttc_matrix.csv'), index=False)
+        fname = 'sttc-matrix.csv' if fname is None else fname
+        sttc_matrix.to_csv(os.path.join(write_dir, fname), index=False)
 
     return sttc_matrix
 
 
 @ray.remote
-def sttc_for_pairs(measurements_df, dt, pairs):
+def sttc_for_pairs(measurements_df, dt, pairs, calculate_null):
     sttc_mat = []
     for i, p in enumerate(pairs):
         neuronA = measurements_df.loc[:, p[0]]
         neuronB = measurements_df.loc[:, p[1]]
         print('Calculating STTC for pair', i, '/', len(pairs))
         observed_val = compute_corr(neuronA.values, neuronB.values, dt)
-        CtrlGrpMean, CtrlGrpStDev, NullSTTC = compute_null_sttc(neuronA.values, neuronB.values, dt)
-        zscore = z_score(observed_val, CtrlGrpMean, CtrlGrpStDev)
-        sttc_mat.append([neuronA.name, neuronB.name, observed_val, CtrlGrpMean, CtrlGrpStDev, NullSTTC, zscore])
+        if calculate_null:
+            CtrlGrpMean, CtrlGrpStDev, NullSTTC = compute_null_sttc(neuronA.values, neuronB.values, dt)
+            zscore = z_score(observed_val, CtrlGrpMean, CtrlGrpStDev)
+            sttc_mat.append([neuronA.name, neuronB.name, observed_val, CtrlGrpMean, CtrlGrpStDev, NullSTTC, zscore])
+        else:
+            sttc_mat.append([neuronA.name, neuronB.name, observed_val])
     return sttc_mat
     
 
