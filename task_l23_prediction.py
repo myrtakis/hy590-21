@@ -70,8 +70,8 @@ if __name__ == '__main__':
     l23_neurons = data_filters.keep_neurons_of_coords(data_dict['coords_data'], 'z', lambda x: 100 < x < 300)
     l4_neurons = data_filters.keep_neurons_of_coords(data_dict['coords_data'], 'z', lambda x: 300 < x < 500)
 
-    valid_l23_neurons_df_f = data_dict['df_f_data'].iloc[:, list(filtered_neuron_ids.intersection(l23_neurons))]
-    valid_l4_neurons_df_f = data_dict['df_f_data'].iloc[:, list(filtered_neuron_ids.intersection(l4_neurons))]
+    valid_l23_neurons_df_f = data_dict['df_f_data'].loc[:, list(filtered_neuron_ids.intersection(l23_neurons))]
+    valid_l4_neurons_df_f = data_dict['df_f_data'].loc[:, list(filtered_neuron_ids.intersection(l4_neurons))]
 
     df_f_valid_data = pd.concat([valid_l4_neurons_df_f, valid_l23_neurons_df_f], axis=1)
 

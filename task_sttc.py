@@ -48,7 +48,7 @@ def filter_neuron_ids(data_dict):
         data_dict['boundaries_data']['x'].values,
         data_filters.keep_neurons_of_area(data_dict['cell_memb_data'], 'V1'),
         # Next line is bypassed because we did not exclude the neurons of lower firing frequency in neural net
-        # data_filters.keep_neurons_of_firing_rate(data_dict['measurements_data'], 0.01)
+        data_filters.keep_neurons_of_firing_rate(data_dict['measurements_data'], 0.01)
     ]
     final_ids = None
     for array_ids in filtered_neuron_ids:
@@ -86,7 +86,7 @@ def calculate_sttc(layers, reference_layer=None):
 
     return sttc(measurements_df, dt=2, neuron_pairs=neuron_pairs,
                 n_jobs=4, write_dir='results', fname='l4_l23_sttc_matrix.csv',
-                calculate_null=False, col_names=col_names)
+                calculate_null=True, col_names=col_names)
 
 
 def write_results(df, write_dir):

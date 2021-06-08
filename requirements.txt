@@ -4,3 +4,4 @@ numpy==1.19.5
 pandas==1.1.5
 ray==1.2.0
 dc-stat-think==1.1.1
+numba==0.53.1
