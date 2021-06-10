@@ -1,4 +1,5 @@
 {
+  "data": "df_f_data",
   "settings": {
     "loss": "mse",
     "metrics": ["mae"],

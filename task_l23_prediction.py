@@ -9,7 +9,7 @@ import argparse
 DF_F_FNAME = 'mouse_24705_s3_idx24_df_f.csv'
 CELL_MEMBERSHIP_FNAME   = 'mouse24705_cellMembership.csv'
 COORDS_FNAME            = 'mouse24705_coords.csv'
-MEASUREMENTS_FNAME      = 'mouse24705_IoannisThreshold_1.5dc_full_18min.csv'
+EVENTOGRAM_FNAME      = 'mouse24705_IoannisThreshold_3nz_1.5dc_full_60min.csv'
 BOUNDARIES_FNAME        = 'mouse24705_withinBoundaries_30um.csv'
 
 
@@ -23,7 +23,7 @@ def read_data(data_dir):
         'cell_memb_data': pd.read_csv(os.path.join(data_dir, CELL_MEMBERSHIP_FNAME)),
         'coords_data': pd.read_csv(os.path.join(data_dir, COORDS_FNAME)),
         'boundaries_data': pd.read_csv(os.path.join(data_dir, BOUNDARIES_FNAME)),
-        # 'measurements_data' : pd.read_csv(os.path.join(data_dir, MEASUREMENTS_FNAME)),
+        'eventogram_data' : pd.read_csv(os.path.join(data_dir, EVENTOGRAM_FNAME)),
         'df_f_data': pd.read_csv(os.path.join(data_dir, DF_F_FNAME))
     }
 
@@ -32,15 +32,14 @@ def unify_col_ids(data_dict):
     # To have a unified neuron id schema
     ids = np.arange(data_dict['df_f_data'].shape[1]) + 1
     data_dict['df_f_data'].columns = ids
-    #data_dict['measurements_data'].columns = ids
+    data_dict['eventogram_data'].columns = ids
 
 
 def filter_neuron_ids(data_dict):
     filtered_neuron_ids = [
         data_dict['boundaries_data']['x'].values,
         data_filters.keep_neurons_of_area(data_dict['cell_memb_data'], 'V1'),
-        # TODO ask if we need to keep only the higher frequency neurons in df/f (now it's only for eventograms)
-        # data_filters.keep_neurons_of_firing_rate(data_dict['measurements_data'], 0.01)
+        data_filters.keep_neurons_of_firing_rate(data_dict['eventogram_data'], 0.01)
     ]
     final_ids = None
     for array_ids in filtered_neuron_ids:
@@ -62,6 +61,8 @@ if __name__ == '__main__':
 
     config_name = args.confpath.split('.')[0]
 
+    config_file = read_pipeline_configs(args.confpath)
+
     data_dict = read_data(args.datadir)
     unify_col_ids(data_dict)
 
@@ -70,11 +71,11 @@ if __name__ == '__main__':
     l23_neurons = data_filters.keep_neurons_of_coords(data_dict['coords_data'], 'z', lambda x: 100 < x < 300)
     l4_neurons = data_filters.keep_neurons_of_coords(data_dict['coords_data'], 'z', lambda x: 300 < x < 500)
 
-    valid_l23_neurons_df_f = data_dict['df_f_data'].loc[:, list(filtered_neuron_ids.intersection(l23_neurons))]
-    valid_l4_neurons_df_f = data_dict['df_f_data'].loc[:, list(filtered_neuron_ids.intersection(l4_neurons))]
+    valid_l23_neurons_data = data_dict[config_file['data']].loc[:, list(filtered_neuron_ids.intersection(l23_neurons))]
+    valid_l4_neurons_data = data_dict[config_file['data']].loc[:, list(filtered_neuron_ids.intersection(l4_neurons))]
 
-    df_f_valid_data = pd.concat([valid_l4_neurons_df_f, valid_l23_neurons_df_f], axis=1)
+    valid_data = pd.concat([valid_l4_neurons_data, valid_l23_neurons_data], axis=1)
 
-    proc = Processor(df_f_valid_data, args.savedir, config_name, read_pipeline_configs(args.confpath),
-                     valid_l4_neurons_df_f.columns, valid_l23_neurons_df_f.columns)
+    proc = Processor(valid_data, args.savedir, config_name, config_file,
+                     valid_l4_neurons_data.columns, valid_l23_neurons_data.columns)
     proc.train_evaluate_model()

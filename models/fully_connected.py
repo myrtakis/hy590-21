@@ -3,6 +3,8 @@ import tensorflow as tf
 from tensorflow.keras.layers import Input, Dense ,Dropout
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras import optimizers,regularizers
+from tensorflow.python.keras.layers import Normalization
+
 from utils.helpers import get_or_default
 
 
@@ -37,7 +39,10 @@ class FullyConnected():
         dropout = float(get_or_default(model_params['regularization'], 'dropout', 0))
 
         #weights=[w,np.random.random(w.shape[1])],
+
         model.add(tf.keras.Input(shape=(input_dim,)))
+
+        model.add(tf.keras.layers.LayerNormalization())
 
         ### add hidden layers
         for units_per_layer in model_params['units_per_hidden_layer']:
@@ -52,8 +57,11 @@ class FullyConnected():
         self.fc.compile(loss=setting_configuration['loss'], metrics=setting_configuration['metrics'],
                             optimizer=setting_configuration['optimizer'])
 
-    def fit_model(self, Xtrain, Xval, epochs=20, callbacks=None):
-        history = self.fc.fit(Xtrain, epochs=epochs, validation_data=Xval, callbacks=callbacks)
+    def fit_model(self, Xtrain, Xval, epochs=20, task='regression', callbacks=None):
+        c_weights = None
+        if task == 'classification':
+            c_weights = {0:1, 1:100}
+        history = self.fc.fit(Xtrain, epochs=epochs, validation_data=Xval, callbacks=callbacks, class_weight=c_weights)
         return history
 
     def get_instance(self):

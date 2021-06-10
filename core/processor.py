@@ -94,7 +94,9 @@ class Processor:
                              input_dim = window.train.element_spec[0].shape[-1],
                              output_dim = window.train.element_spec[1].shape[-1])
 
-            history = model.fit_model(window.train, window.val, epochs=self.settings_config['epochs'], callbacks = self.get_callbacks(fold_name))
+            task = self.model_config['task']
+
+            history = model.fit_model(window.train, window.val, epochs=self.settings_config['epochs'], callbacks = self.get_callbacks(fold_name), task=task)
                         
             perfomances['validation'][fold_name] = model.get_instance().evaluate(window.val)
             
