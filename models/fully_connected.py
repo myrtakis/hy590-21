@@ -40,9 +40,9 @@ class FullyConnected():
 
         #weights=[w,np.random.random(w.shape[1])],
 
+        model.add(tf.keras.layers.LayerNormalization(axis = -1))
+ 
         model.add(tf.keras.Input(shape=(input_dim,)))
-
-        model.add(tf.keras.layers.LayerNormalization())
 
         ### add hidden layers
         for units_per_layer in model_params['units_per_hidden_layer']:

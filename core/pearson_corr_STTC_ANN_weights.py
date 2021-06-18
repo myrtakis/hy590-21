@@ -21,7 +21,8 @@ import sys
 sys.exit()
 
 #os.chdir('C:\\Users\\john\\Desktop\\hy590-21\\environment\\configs\\fully_connected\\1622537625.328412\\'+fold_name)
-new_model = tf.keras.models.load_model('C:\\Users\\john\\Desktop\\hy590-21\\environment\\configs\\fully_connected\\1622048185.470065\\'+fold_name+'\\model_epoch_100.hdf5')
+
+new_model = tf.keras.models.load_model('D:\\Downloads\\fully_connected\\1622048185.470065\\'+fold_name+'\\model_epoch_100.hdf5')
 
 weights = new_model.weights[0]
    
